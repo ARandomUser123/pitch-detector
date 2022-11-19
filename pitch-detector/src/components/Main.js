@@ -4,59 +4,42 @@ import Col from "react-bootstrap/Col";
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 import { PitchDetector } from "pitchy";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 export default function Main() {
-  const [audio, setAudio] = useState(null);
-  const [analyser, setAnalyser] = useState(null);
-  const [context, setContext] = useState(null);
+  const audio = useRef(null);
   const [timer, setTimer] = useState(null);
   const [pitch, setPitch] = useState(null);
 
-  const getMicrophone = async () => {
-    const audioContext = new window.AudioContext();
-    const analyserNode = audioContext.createAnalyser();
-    const audio = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-    });
-    await audioContext.createMediaStreamSource(audio).connect(analyserNode);
-    setAudio(audio);
-    setContext(audioContext);
-    setAnalyser(analyserNode);
-  };
-
   const stopMicrophone = () => {
-    audio.getTracks().forEach((track) => track.stop());
-    setAudio(null);
+    audio.current.getTracks().forEach((track) => track.stop());
+    audio.current = null;
     clearInterval(timer);
     setTimer(null);
   };
 
-  const getPitch = () => {
+  const getPitch = (analyser, audioContext) => {
     const detector = PitchDetector.forFloat32Array(analyser.fftSize);
     const input = new Float32Array(detector.inputLength);
     analyser.getFloatTimeDomainData(input);
-    const [pitch, clarity] = detector.findPitch(input, context.sampleRate);
-    console.log("getPitch", analyser);
+    const [pitch] = detector.findPitch(input, audioContext.sampleRate);
     setPitch(pitch);
   };
 
   const startDetection = async () => {
-    if (audio == null) {
-      await getMicrophone();
-    }
-    console.log("startDetection", timer);
+    const audioContext = new window.AudioContext();
+    const analyserNode = audioContext.createAnalyser();
+    audio.current = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+    });
+    audioContext.createMediaStreamSource(audio.current).connect(analyserNode);
     if (timer == null) {
-      const interval = setInterval(getPitch, 100);
+      const interval = setInterval(getPitch, 100, analyserNode, audioContext);
       setTimer(interval);
     }
   };
 
-  useEffect(() => {
-    getMicrophone();
-  }, []);
-
-  console.log("audio", audio);
+  useEffect(() => {}, []);
 
   return (
     <Container style={{ marginTop: 30 }}>
@@ -64,9 +47,9 @@ export default function Main() {
         <Col>
           <Button
             style={{ width: "100%" }}
-            onClick={audio == null ? startDetection : stopMicrophone}
+            onClick={audio.current == null ? startDetection : stopMicrophone}
           >
-            {audio == null ? "Start detection" : "Stop  microphone"}
+            {audio.current == null ? "Start detection" : "Stop  microphone"}
           </Button>
         </Col>
       </Row>
@@ -82,8 +65,8 @@ export default function Main() {
           </Card.Body>
         </Card>
       </Row>
-      <Row> {audio == null ? "Audio not ready!" : "Audio ready"}</Row>
-      <Row> {pitch ?? 0} </Row>
+      <Row> {audio.current == null ? "Audio not ready!" : "Audio ready"}</Row>
+      <Row> {pitch ?? 0} hz </Row>
     </Container>
   );
 }
