@@ -12,7 +12,7 @@ export default function MyNav() {
           <Nav className="me-auto">
             <Nav.Link href="#home">Home</Nav.Link>
           </Nav>
-          <Navbar.Brand href="https://github.com">
+          <Navbar.Brand href="https://github.com/ARandomUser123">
             <img
               src="./github.png"
               width="30"
