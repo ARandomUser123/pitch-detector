@@ -4,13 +4,15 @@ import Col from "react-bootstrap/Col";
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 import { PitchDetector } from "pitchy";
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef } from "react";
 
 export default function Main() {
   const audio = useRef(null);
   const [timer, setTimer] = useState(null);
   const [pitch, setPitch] = useState(null);
-  const [clarity, setClarity] = useState(null);
+  const [history, setHistory] = useState([]);
+  const released = useRef(true);
+
   const stopMicrophone = () => {
     audio.current.getTracks().forEach((track) => track.stop());
     audio.current = null;
@@ -35,11 +37,22 @@ export default function Main() {
     const detector = PitchDetector.forFloat32Array(analyser.fftSize);
     const input = new Float32Array(detector.inputLength);
     analyser.getFloatTimeDomainData(input);
-    const [pitch, clarity] = detector.findPitch(input, audioContext.sampleRate);
-    if (clarity >= 0.99) {
-      setPitch(pitch);
+    const [frequency, clarity] = detector.findPitch(
+      input,
+      audioContext.sampleRate
+    );
+    if (clarity >= 0.95) {
+      const pitchNew = freqToPitch(frequency);
+      if (released.current) {
+        released.current = false;
+        setPitch(pitchNew);
+        history.push(pitchNew);
+        setHistory(history);
+        console.log(history);
+      }
+    } else {
+      released.current = true;
     }
-    setClarity(clarity);
   };
 
   const pitchMap = {
@@ -193,8 +206,8 @@ export default function Main() {
         </Card>
       </Row>
       <Row> {audio.current == null ? "Audio not ready!" : "Audio ready"} </Row>
-      <Row> {pitch ?? 0} hz</Row>
-      <Row>{freqToPitch(pitch ?? 0)}</Row>
+      <Row>{pitch}</Row>
+      <Row> {history.join(",")} </Row>
     </Container>
   );
 }
