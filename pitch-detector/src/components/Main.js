@@ -10,7 +10,7 @@ export default function Main() {
   const audio = useRef(null);
   const [timer, setTimer] = useState(null);
   const [pitch, setPitch] = useState(null);
-
+  const [clarity, setClarity] = useState(null);
   const stopMicrophone = () => {
     audio.current.getTracks().forEach((track) => track.stop());
     audio.current = null;
@@ -35,8 +35,11 @@ export default function Main() {
     const detector = PitchDetector.forFloat32Array(analyser.fftSize);
     const input = new Float32Array(detector.inputLength);
     analyser.getFloatTimeDomainData(input);
-    const [pitch] = detector.findPitch(input, audioContext.sampleRate);
-    setPitch(pitch);
+    const [pitch, clarity] = detector.findPitch(input, audioContext.sampleRate);
+    if (clarity >= 0.99) {
+      setPitch(pitch);
+    }
+    setClarity(clarity);
   };
 
   const pitchMap = {
@@ -150,10 +153,21 @@ export default function Main() {
     B8: 7902.13,
   };
 
-  const freqToPitch = (hz) => {
-    Object.entries(pitchMap).forEach(([pitch, frequency]) => {});
-    return "";
+  const freqToPitch = (input) => {
+    let minDiff = 10000;
+    let pitchMin;
+
+    Object.entries(pitchMap).forEach(([pitch, frequency]) => {
+      const diff = Math.abs(input - frequency);
+      if (diff < minDiff) {
+        pitchMin = pitch;
+        minDiff = diff;
+      }
+    });
+
+    return pitchMin;
   };
+
   return (
     <Container style={{ marginTop: 30 }}>
       <Row>
