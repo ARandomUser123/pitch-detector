@@ -13,11 +13,17 @@ export default function Main() {
   const [history, setHistory] = useState([]);
   const released = useRef(true);
 
+  const clearHistory = () => {
+    setHistory([]);
+    setPitch(null);
+  };
+
   const stopMicrophone = () => {
     audio.current.getTracks().forEach((track) => track.stop());
     audio.current = null;
     clearInterval(timer);
     setTimer(null);
+    clearHistory();
   };
 
   const startDetection = async () => {
@@ -45,10 +51,9 @@ export default function Main() {
       const pitchNew = freqToPitch(frequency);
       if (released.current) {
         released.current = false;
-        setPitch(pitchNew);
         history.push(pitchNew);
         setHistory(history);
-        console.log(history);
+        setPitch(pitchNew);
       }
     } else {
       released.current = true;
@@ -183,7 +188,7 @@ export default function Main() {
 
   return (
     <Container style={{ marginTop: 30 }}>
-      <Row>
+      <Row style={{ marginBottom: 30 }}>
         <Col>
           <Button
             style={{ width: "100%" }}
@@ -192,21 +197,20 @@ export default function Main() {
             {audio.current == null ? "Start Detection" : "Stop microphone"}
           </Button>
         </Col>
+        <Col>
+          <Button style={{ width: "100%" }} onClick={clearHistory}>
+            Clear history
+          </Button>
+        </Col>
       </Row>
       <Row style={{ margiTop: 30 }} className="justify-content-center">
         <Card style={{ width: "18rem" }}>
           <Card.Body>
-            <Card.Title>Card Title</Card.Title>
-            <Card.Text>
-              Some quick example text to build on the card title and make up the
-              bulk of the card's content.
-            </Card.Text>
-            <Button variant="primary">Go somewhere</Button>
+            <Card.Text>{pitch}</Card.Text>
           </Card.Body>
         </Card>
       </Row>
       <Row> {audio.current == null ? "Audio not ready!" : "Audio ready"} </Row>
-      <Row>{pitch}</Row>
       <Row> {history.join(",")} </Row>
     </Container>
   );
