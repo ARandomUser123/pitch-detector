@@ -14,7 +14,7 @@ export default function MyNav() {
           </Nav>
           <Navbar.Brand href="https://github.com/ARandomUser123">
             <img
-              src="./github.png"
+              src="./github-mark.png"
               width="30"
               height="30"
               className="d-inline-block align-top"
