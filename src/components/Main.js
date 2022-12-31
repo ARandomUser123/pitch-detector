@@ -45,7 +45,7 @@ export default function Main() {
     const detector = PitchDetector.forFloat32Array(analyser.fftSize);
     const input = new Float32Array(detector.inputLength);
     analyser.getFloatTimeDomainData(input);
-    console.log(input);
+
     const [frequency, clarity] = detector.findPitch(
       input,
       audioContext.sampleRate
@@ -112,7 +112,6 @@ export default function Main() {
         </Card>
       </Row>
 
-      <Row> {history.join(",")} </Row>
       <Row style={{ marginBottom: 30 }}>
         <Form.Control
           type="file"
@@ -130,6 +129,10 @@ export default function Main() {
           variant="primary"
           onClick={() => {
             const reader = new FileReader();
+            if (file == null) {
+              alert("please upload a file");
+              return;
+            }
             reader.readAsArrayBuffer(file);
             reader.onload = async () => {
               const arrayBuffer = reader.result;
@@ -141,31 +144,40 @@ export default function Main() {
               const audioBuffer = await offlineAudioContext.decodeAudioData(
                 arrayBuffer
               );
+              const pitches = [];
+              let released = true;
               for (
                 let i = 0;
                 i < audioBuffer.length;
-                i += audioBuffer.sampleRate / 10
+                i += audioBuffer.sampleRate / 20
               ) {
-                const input = new Float32Array(audioBuffer.sampleRate / 10);
+                const input = new Float32Array(audioBuffer.sampleRate / 20);
                 audioBuffer.copyFromChannel(input, 0, i);
                 const detector = PitchDetector.forFloat32Array(
-                  audioBuffer.sampleRate / 10
+                  audioBuffer.sampleRate / 20
                 );
-                // console.log(input);
+
                 const [frequency, clarity] = detector.findPitch(
                   input,
                   offlineAudioContext.sampleRate
                 );
-                // console.log(frequency, clarity);
+
                 const pitchNew = freqToPitch(frequency);
-                console.log("pitchNew", pitchNew);
+                if (clarity > 0.95 && released) {
+                  pitches.push(pitchNew);
+                  released = false;
+                } else if (clarity < 0.8) {
+                  released = true;
+                }
               }
+              setHistory(pitches);
             };
           }}
         >
           Start file detection
         </Button>
       </Row>
+      <Row> {history.join(",")} </Row>
     </Container>
   );
 }
