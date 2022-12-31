@@ -1,4 +1,4 @@
-const pitchMap = {
+export const pitchMap = {
   C0: 16.35,
   "C#0/Db0": 17.32,
   D0: 18.35,
@@ -108,4 +108,18 @@ const pitchMap = {
   "A#8/Bb8": 7458.62,
   B8: 7902.13,
 };
-export default pitchMap;
+
+export const freqToPitch = (input) => {
+  let minDiff = 10000;
+  let pitchMin;
+
+  Object.entries(pitchMap).forEach(([pitch, frequency]) => {
+    const diff = Math.abs(input - frequency);
+    if (diff < minDiff) {
+      pitchMin = pitch;
+      minDiff = diff;
+    }
+  });
+
+  return pitchMin;
+};
