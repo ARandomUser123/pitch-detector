@@ -10,16 +10,19 @@ export default function MyNav() {
         <Navbar.Brand href="./">Eric's Pitch Detector</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="me-auto">
+          <Nav>
             <Nav.Link href="/">Home</Nav.Link>
           </Nav>
-          <Nav className="me-auto">
+          <Nav>
             <Nav.Link href="/audio">Audio detector</Nav.Link>
           </Nav>
-          <Nav className="me-auto">
+          <Nav>
             <Nav.Link href="/file">File detector</Nav.Link>
           </Nav>
-          <Navbar.Brand href="https://github.com/ARandomUser123">
+          <Nav>
+            <Nav.Link href="https://github.com/ARandomUser123">Github</Nav.Link>
+          </Nav>
+          {/* <Navbar.Brand href="https://github.com/ARandomUser123">
             <img
               src="./github-mark.png"
               width="30"
@@ -27,7 +30,7 @@ export default function MyNav() {
               className="d-inline-block align-top"
               alt="React Bootstrap logo"
             />
-          </Navbar.Brand>
+          </Navbar.Brand> */}
         </Navbar.Collapse>
       </Container>
     </Navbar>
