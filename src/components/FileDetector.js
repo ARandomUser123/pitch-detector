@@ -3,7 +3,8 @@ import Row from "react-bootstrap/Row";
 import Button from "react-bootstrap/Button";
 import { PitchDetector } from "pitchy";
 import { useState } from "react";
-import { freqToPitch } from "../utils/utils.js";
+import { freqToPitch, abcMap } from "../utils/utils.js";
+import Abcjs from "react-abcjs";
 
 export default function FileDetecotr() {
   const [file, setFile] = useState(null);
@@ -76,6 +77,14 @@ export default function FileDetecotr() {
         </Button>
       </Row>
       <Row> {history.join(",")} </Row>
+      <Row>
+        <Abcjs
+          abcNotation={history.map((pitch) => abcMap[pitch]).join(" ")}
+          parserParams={{}}
+          engraverParams={{ responsive: "resize" }}
+          renderParams={{ viewportHorizontal: true }}
+        />{" "}
+      </Row>
     </>
   );
 }

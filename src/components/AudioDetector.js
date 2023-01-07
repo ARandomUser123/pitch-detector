@@ -4,7 +4,8 @@ import Col from "react-bootstrap/Col";
 import Card from "react-bootstrap/Card";
 import { useState, useRef } from "react";
 import { PitchDetector } from "pitchy";
-import { freqToPitch } from "../utils/utils.js";
+import { freqToPitch, abcMap } from "../utils/utils.js";
+import Abcjs from "react-abcjs";
 
 export default function AudioDetector() {
   const [history, setHistory] = useState([]);
@@ -93,6 +94,14 @@ export default function AudioDetector() {
         </Card>
       </Row>
       <Row> {history.join(",")} </Row>
+      <Row>
+        <Abcjs
+          abcNotation={history.map((pitch) => abcMap[pitch]).join(" ")}
+          parserParams={{}}
+          engraverParams={{ responsive: "resize" }}
+          renderParams={{ viewportHorizontal: true }}
+        />
+      </Row>
     </>
   );
 }
